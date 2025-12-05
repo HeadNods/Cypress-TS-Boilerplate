@@ -3,13 +3,8 @@ name: Cypress TS E2E Tests
 on:
   push:
     branches: [ main, master ]
-    paths:
-      - 'cypress-ts-boilerplate/**'
-      - '.github/workflows/cypress-ts-workflow.yml'
   pull_request:
     branches: [ main, master ]
-    paths:
-      - 'cypress-ts-boilerplate/**'
   workflow_dispatch:
     inputs:
       use_docker:
@@ -46,15 +41,12 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: cypress-ts-boilerplate/package.json
       
       - name: Install dependencies
-        working-directory: cypress-ts-boilerplate
-        run: npm install
+        run: npm ci
       
       - name: Run Cypress tests (non-Docker)
         if: ${{ !inputs.use_docker }}
-        working-directory: cypress-ts-boilerplate
         run: |
           if [ "${{ inputs.browser }}" = "chrome" ] || [ "${{ inputs.browser }}" = "firefox" ] || [ "${{ inputs.browser }}" = "edge" ]; then
             npm run test:${{ inputs.browser }}
@@ -64,7 +56,6 @@ jobs:
       
       - name: Run Cypress tests (Docker)
         if: ${{ inputs.use_docker }}
-        working-directory: cypress-ts-boilerplate
         run: |
           if [ "${{ inputs.browser }}" = "chrome" ] || [ "${{ inputs.browser }}" = "firefox" ] || [ "${{ inputs.browser }}" = "edge" ]; then
             npm run docker:compose:${{ inputs.browser }}
@@ -76,7 +67,6 @@ jobs:
 
       - name: Cleanup containers (Docker)
         if: ${{ inputs.use_docker && always() }}
-        working-directory: cypress-ts-boilerplate
         run: npm run docker:compose:down
       
       - name: Upload Cypress screenshots
@@ -84,7 +74,7 @@ jobs:
         if: failure()
         with:
           name: cypress-ts-screenshots
-          path: cypress-ts-boilerplate/cypress/screenshots
+          path: cypress/screenshots
           retention-days: 3
           if-no-files-found: ignore
       
@@ -93,7 +83,7 @@ jobs:
         if: always()
         with:
           name: cypress-ts-videos
-          path: cypress-ts-boilerplate/cypress/videos
+          path: cypress/videos
           retention-days: 3
           if-no-files-found: ignore
       
@@ -102,7 +92,7 @@ jobs:
         if: always()
         with:
           name: cypress-ts-test-results
-          path: cypress-ts-boilerplate/cypress/reports/*.html
+          path: cypress/reports/*.html
           retention-days: 5
           if-no-files-found: ignore
       
